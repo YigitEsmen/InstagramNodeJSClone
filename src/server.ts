@@ -1,10 +1,23 @@
 import { config } from 'dotenv'
+import { connect } from 'mongoose'
 
-// Load environment variables
+process.on('uncaughtException', (err) => {
+    console.log('UNCOUGHT EXCEPTION 💥 Shutting down...')
+    console.error('ERROR 💥', err)
+    process.exit(1)
+})
+
 config()
+
+connect(process.env.MONGODB_URI)
 
 import app from './app'
 
-// Start server
 const port = process.env.PORT
-app.listen(port, () => console.log(`App running on port ${port}...`))
+const server = app.listen(port, () => console.log(`App running or port ${port}...`))
+
+process.on('unhandledRejection', err => {
+    console.log('UNHANDLED REJECTION 💥 Shutting down...')
+    console.error('ERROR 💥', err)
+    server.close(() => process.exit(1))
+})
